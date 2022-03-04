@@ -107,8 +107,8 @@ foreach dep, version : deps
 endforeach
 
 # mandatory dependencies, without specific version requirement
-# TODO: specify minimum version for cairo, jpeg and zlib?
-deps = ['cairo', 'libjpeg', 'zlib', 'json-glib-1.0']
+# TODO: specify minimum version for jpeg and zlib?
+deps = ['libjpeg', 'zlib', 'json-glib-1.0']
 if host_machine.system() == 'windows'
   deps += 'gio-windows-2.0'
 else
