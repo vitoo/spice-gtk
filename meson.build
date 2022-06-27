@@ -49,9 +49,10 @@ spice_gtk_config_data.merge_from(spice_common.get_variable('spice_common_config_
 spice_glib_deps += spice_common.get_variable('spice_common_client_dep')
 spice_protocol_version = spice_common.get_variable('spice_protocol_version')
 
-subproject('keycodemapdb')
-keymapgen = files('subprojects/keycodemapdb/tools/keymap-gen')
-keymapcsv = files('subprojects/keycodemapdb/data/keymaps.csv')
+keycodemapdb = subproject('keycodemapdb')
+
+keymapgen = find_program('keymap-gen')
+keymapcsv = keycodemapdb.get_variable('keymaps_csv')
 
 #
 # check for system headers

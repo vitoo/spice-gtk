@@ -312,7 +312,7 @@ if spice_gtk_has_gtk
   foreach keymap : keymaps
     varname = 'keymap_@0@2xtkbd'.format(keymap)
     target = 'vncdisplay@0@.h'.format(varname)
-    cmd = [python, keymapgen, '--lang', 'glib2', '--varname', varname, 'code-map', keymapcsv, keymap, 'xtkbd']
+    cmd = [python, keymapgen, 'code-map', '--lang', 'glib2', '--varname', varname, keymapcsv, keymap, 'xtkbd']
     spice_client_gtk_sources += custom_target(target,
                                               output : target,
                                               capture : true,
