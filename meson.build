@@ -184,11 +184,17 @@ endif
 
 # webdav
 spice_gtk_has_phodav = false
-phodav_dep = dependency('libphodav-2.0', required: get_option('webdav'))
-summary_info += {'webdav': phodav_dep.found()}
+phodav_dep = dependency('libphodav-3.0', required: false)
+if not phodav_dep.found()
+  phodav_dep = dependency('libphodav-2.0', required: get_option('webdav'))
+endif
 if phodav_dep.found()
   spice_glib_deps += phodav_dep
-  d = dependency('libsoup-2.4', version : '>= 2.49.91', required: get_option('webdav'))
+  if phodav_dep.name() == 'libphodav-3.0'
+    d = dependency('libsoup-3.0', version : '>= 3.0', required: get_option('webdav'))
+  else
+    d = dependency('libsoup-2.4', version : '>= 2.49.91', required: get_option('webdav'))
+  endif
   if d.found()
     spice_glib_deps += d
     spice_gtk_config_data.set('USE_PHODAV', '1')
@@ -198,6 +204,7 @@ if phodav_dep.found()
     endif
   endif
 endif
+summary_info += {'webdav': spice_gtk_has_phodav}
 
 gstreamer_version = '1.10'
 gstreamer_version_info = '>= @0@'.format(gstreamer_version)
