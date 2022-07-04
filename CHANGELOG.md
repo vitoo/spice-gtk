@@ -1,3 +1,12 @@
+v0.41
+=====
+
+- !100 - meson: move cairo dependency to GTK build only
+- !102 - coroutine: add support for libucontext
+- !105 - build against phodav-3.0/soup-3.0
+- fix openssl 3.0 warnings
+- meson: fix invalid use of subproject()
+
 v0.40
 =====
 
