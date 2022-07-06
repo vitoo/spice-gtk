@@ -735,13 +735,13 @@ static const GtkActionEntry entries[] = {
         .stock_id    = "edit-copy",
         .label       = "_Copy to guest",
         .callback    = G_CALLBACK(menu_cb_copy),
-        .accelerator = "", /* none (disable default "<control>C") */
+        .accelerator = "<shift>F5",
     },{
         .name        = "PasteFromGuest",
         .stock_id    = "edit-paste",
         .label       = "_Paste from guest",
         .callback    = G_CALLBACK(menu_cb_paste),
-        .accelerator = "", /* none (disable default "<control>V") */
+        .accelerator = "<shift>F6",
     },{
 
         /* View menu */
