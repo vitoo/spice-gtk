@@ -12,9 +12,17 @@ static GMainLoop     *mainloop = NULL;
 
 static int connections = 0;
 
+#define SPICE_TYPE_WINDOW                  (spice_window_get_type ())
+ 
+
 typedef struct _SpiceWindow SpiceWindow;
 typedef struct _SpiceWindowClass SpiceWindowClass;
 typedef struct spice_connection spice_connection;
+
+struct _SpiceWindowClass
+{
+  GObjectClass parent_class;
+};
 
 struct _SpiceWindow {
     GObject          object;
@@ -46,6 +54,117 @@ struct spice_connection {
     /* key: SpiceFileTransferTask, value: TransferTaskWidgets */
     GHashTable *transfers;
 };
+
+static GType spice_window_get_type(void);
+
+
+G_DEFINE_TYPE (SpiceWindow, spice_window, G_TYPE_OBJECT)
+
+static void
+spice_window_class_init (SpiceWindowClass *klass)
+{
+}
+
+static void
+spice_window_init (SpiceWindow *self)
+{
+}
+
+static SpiceWindow *create_spice_window(spice_connection *conn, SpiceChannel *channel, int id, gint monitor_id)
+{
+    char title[32];
+    SpiceWindow *win;
+    gboolean state;
+    GError *err = NULL;
+    int i;
+
+    win = g_object_new(SPICE_TYPE_WINDOW, NULL);
+    win->id = id;
+    win->monitor_id = monitor_id;
+    win->conn = conn;
+    win->display_channel = channel;
+
+    return win;
+}
+
+static void destroy_spice_window(SpiceWindow *win)
+{
+    if (win == NULL)
+        return;
+
+    SPICE_DEBUG("destroy window (#%d:%d)", win->id, win->monitor_id);
+    g_object_unref(win);
+}
+
+
+static void del_window(spice_connection *conn, SpiceWindow *win)
+{
+    if (win == NULL)
+        return;
+
+    g_return_if_fail(win->id < CHANNELID_MAX);
+    g_return_if_fail(win->monitor_id < MONITORID_MAX);
+
+    g_debug("del display monitor %d:%d", win->id, win->monitor_id);
+    conn->wins[win->id * CHANNELID_MAX + win->monitor_id] = NULL;
+    if (win->id > 0)
+        spice_main_channel_update_display_enabled(conn->main, win->id, FALSE, TRUE);
+    else
+        spice_main_channel_update_display_enabled(conn->main, win->monitor_id, FALSE, TRUE);
+    spice_main_channel_send_monitor_config(conn->main);
+
+    destroy_spice_window(win);
+}
+
+static SpiceWindow* get_window(spice_connection *conn, int channel_id, int monitor_id)
+{
+    g_return_val_if_fail(channel_id < CHANNELID_MAX, NULL);
+    g_return_val_if_fail(monitor_id < MONITORID_MAX, NULL);
+
+    return conn->wins[channel_id * CHANNELID_MAX + monitor_id];
+}
+
+
+static void add_window(spice_connection *conn, SpiceWindow *win)
+{
+    g_return_if_fail(win != NULL);
+    g_return_if_fail(win->id < CHANNELID_MAX);
+    g_return_if_fail(win->monitor_id < MONITORID_MAX);
+    g_return_if_fail(conn->wins[win->id * CHANNELID_MAX + win->monitor_id] == NULL);
+
+    SPICE_DEBUG("add display monitor %d:%d", win->id, win->monitor_id);
+    conn->wins[win->id * CHANNELID_MAX + win->monitor_id] = win;
+}
+
+static void display_monitors(SpiceChannel *display, GParamSpec *pspec,
+                             spice_connection *conn)
+{
+    GArray *monitors = NULL;
+    int id;
+    guint i;
+
+    g_object_get(display,
+                 "channel-id", &id,
+                 "monitors", &monitors,
+                 NULL);
+    g_return_if_fail(monitors != NULL);
+
+    for (i = 0; i < monitors->len; i++) {
+        SpiceWindow *w;
+
+        if (!get_window(conn, id, i)) {
+            w = create_spice_window(conn, display, id, i);
+            add_window(conn, w);
+            // spice_g_signal_connect_object(display, "display-mark",
+            //                               G_CALLBACK(display_mark), w, 0);
+        }
+    }
+
+    for (; i < MONITORID_MAX; i++)
+        del_window(conn, get_window(conn, id, i));
+
+    g_clear_pointer(&monitors, g_array_unref);
+}
 
 
 static void main_channel_event(SpiceChannel *channel, SpiceChannelEvent event,
@@ -153,9 +272,9 @@ static void channel_new(SpiceSession *s, SpiceChannel *channel, gpointer data)
         if (conn->wins[id] != NULL)
             return;
         SPICE_DEBUG("new display channel (#%d)", id);
-        // g_signal_connect(channel, "notify::monitors",
-        //                  G_CALLBACK(display_monitors), conn);
-        // spice_channel_connect(channel);
+        g_signal_connect(channel, "notify::monitors",
+                         G_CALLBACK(display_monitors), conn);
+        spice_channel_connect(channel);
     }
 
     if (SPICE_IS_INPUTS_CHANNEL(channel)) {
@@ -218,23 +337,35 @@ static spice_connection *connection_new(void)
     return conn;
 }
 
-void resize(gpointer connP, int width, int height)
+static bool resize(gpointer connP)
 {
     spice_connection *conn = connP;
-    
-    g_message("spice_main_channel_update_display_enabled ");
- 
-    spice_main_channel_update_display_enabled(conn->main, conn->wins[0]->id + conn->wins[0]->monitor_id, TRUE,
-                                                  FALSE);
+   
 
     g_message("spice_main_channel_update_display ");
 
-    spice_main_channel_update_display(
+    for (int i = 0; i < SPICE_N_ELEMENTS(conn->wins); i++) {
+        // g_message("trying display %d ", i);   
+
+        if (conn->wins[i] == NULL)
+            continue;            
+
+         g_message("available display : %d ", i);   
+
+        spice_main_channel_update_display_enabled( conn->main,
+            conn->wins[0]->id + conn->wins[0]->monitor_id,
+             TRUE, FALSE);
+
+         spice_main_channel_update_display(
             conn->main,
             conn->wins[0]->id + conn->wins[0]->monitor_id,
-            0,0,width,height,TRUE);
-        spice_main_channel_send_monitor_config(conn->wins[0]->conn->main);
+            0, 0, 1400, 800, TRUE);
+    }
+   
 
+    spice_main_channel_send_monitor_config(conn->main);
+
+    return false;
 }
 
 int main(int argc, char *argv[])
@@ -259,11 +390,11 @@ int main(int argc, char *argv[])
     else{
         printf("spice_session_connect OK\n");
     } 
-
-
-    g_main_loop_run(mainloop);
-
      
+    g_timeout_add(2*1000, resize, conn);
+  
+    g_main_loop_run(mainloop);
+    
 
      printf("coucouz \n");
     
