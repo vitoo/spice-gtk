@@ -2342,6 +2342,7 @@ static void channel_finally_destroyed(gpointer data, GObject *channel)
     SpiceSession *session = SPICE_SESSION(data);
     SpiceSessionPrivate *s = session->priv;
     s->channels_destroying--;
+    SPICE_DEBUG(channel, "Remaining channel to destroy : %d", s->channels_destroying);
     if (s->channels == NULL && (s->channels_destroying == 0)) {
         g_signal_emit(session, signals[SPICE_SESSION_DISCONNECTED], 0);
     }

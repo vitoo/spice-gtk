@@ -5,3 +5,4 @@ build :
     cd builddir
     meson compile
     ./resize
+

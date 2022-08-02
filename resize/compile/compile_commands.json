@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "/opt/Source-Weytop/github/spice-gtk/resize/compile",
+    "command": "cc -Iresize@exe -I. -I.. -I/usr/include/spice-client-glib-2.0 -I/usr/include/pixman-1 -I/usr/include/spice-1 -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g  -MD -MQ 'resize@exe/resize.c.o' -MF 'resize@exe/resize.c.o.d' -o 'resize@exe/resize.c.o' -c ../resize.c",
+    "file": "../resize.c"
+  }
+]

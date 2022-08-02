@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include <glib.h>
 #include <spice-client.h>
+#include <glib-unix.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+ 
 
 #define CHANNELID_MAX 4
 #define MONITORID_MAX 4
@@ -368,11 +372,53 @@ static bool resize(gpointer connP)
     return false;
 }
 
+
+
+static int open_unix_sock(const char *unixsock, GError **error)
+{
+    struct sockaddr_un addr;
+    int fd;
+
+    if (strlen(unixsock) + 1 > sizeof(addr.sun_path)) {
+        // g_set_error(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+        //             _("Address is too long for UNIX socket_path: %s"), unixsock);
+
+             DEBUG_INFO("Address is too long for UNIX socket_path: %s", unixsock);
+           
+        return -1;
+    }
+
+    memset(&addr, 0, sizeof addr);
+    addr.sun_family = AF_UNIX;
+    strcpy(addr.sun_path, unixsock);
+
+    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+        // g_set_error(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+        //             _("Creating UNIX socket failed: %s"), g_strerror(errno));
+         DEBUG_INFO("Creating UNIX socket failed: %s", g_strerror(errno));
+
+        return -1;
+    }
+
+    if (connect(fd, (struct sockaddr *)&addr, sizeof addr) < 0) {
+        // g_set_error(error, VIRT_VIEWER_ERROR, VIRT_VIEWER_ERROR_FAILED,
+                    // _("Connecting to UNIX socket failed: %s"), g_strerror(errno));
+       DEBUG_INFO("Connecting to UNIX socket failed: %s", g_strerror(errno));
+
+        close(fd);
+        return -1;
+    }
+
+    DEBUG_INFO("connexion socket OK !!! FD =  %d", fd);
+
+    return fd;
+}
+
 int main(int argc, char *argv[])
 { 
    
     spice_connection *conn;
-    char *host = "localhost", *port = "5930";
+    char *host = "/dev/shm/pve-spice-103.sock", *port = "5930";
 
     mainloop = g_main_loop_new(NULL, false);
 
@@ -381,9 +427,12 @@ int main(int argc, char *argv[])
     conn = connection_new(); 
  
     g_object_set(conn->session,"host", host, NULL); 
-    g_object_set(conn->session, "port", port, NULL);
+    // g_object_set(conn->session, "port", port, NULL);
 
-     if (!spice_session_connect(conn->session)) {
+    GError *error = NULL;
+    int fd = open_unix_sock(host, &error);
+
+     if (!spice_session_open_fd(conn->session, fd)) {
         printf("spice_session_connect failed\n");
         exit(1);
     }

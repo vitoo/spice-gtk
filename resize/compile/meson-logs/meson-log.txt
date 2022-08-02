@@ -1,0 +1,71 @@
+Build started at 2022-07-20T16:54:52.056392
+Main binary: /usr/bin/python3
+Python system: Linux
+The Meson build system
+Version: 0.49.2
+Source dir: /opt/Source-Weytop/github/spice-gtk/resize
+Build dir: /opt/Source-Weytop/github/spice-gtk/resize/compile
+Build type: native build
+Project name: resize
+Project version: undefined
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc /opt/Source-Weytop/github/spice-gtk/resize/compile/meson-private/sanitycheckc.c -o /opt/Source-Weytop/github/spice-gtk/resize/compile/meson-private/sanitycheckc.exe
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /opt/Source-Weytop/github/spice-gtk/resize/compile/meson-private/sanitycheckc.exe
+Native C compiler: cc (gcc 8.3.0 "cc (Debian 8.3.0-6) 8.3.0")
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Found pkg-config: /usr/bin/pkg-config (0.29)
+Determining dependency 'spice-client-glib-2.0' with pkg-config executable '/usr/bin/pkg-config'
+Called `/usr/bin/pkg-config --modversion spice-client-glib-2.0` -> 0
+0.35
+Called `/usr/bin/pkg-config --cflags spice-client-glib-2.0` -> 0
+-I/usr/include/spice-client-glib-2.0 -I/usr/include/pixman-1 -I/usr/include/spice-1
+Called `/usr/bin/pkg-config spice-client-glib-2.0 --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lspice-client-glib-2.0
+Called `/usr/bin/pkg-config spice-client-glib-2.0 --libs` -> 0
+-lspice-client-glib-2.0
+Running compile:
+Working directory:  /tmp/tmp7vmy1lil
+Command line:  cc /tmp/tmp7vmy1lil/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmp7vmy1lil/output.exe -O0 
+
+Code:
+ #include<stdio.h>
+        
+        int main(int argc, char **argv) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        };
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Running compile:
+Working directory:  /tmp/tmpalszejlb
+Command line:  cc /tmp/tmpalszejlb/testfile.c -pipe -D_FILE_OFFSET_BITS=64 -c -o /tmp/tmpalszejlb/output.obj -O0 --print-search-dirs 
+
+Code:
+ 
+Compiler stdout:
+ install: /usr/lib/gcc/x86_64-linux-gnu/8/
+programs: =/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/bin/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/bin/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/bin/
+libraries: =/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/8/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/8/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+
+Compiler stderr:
+ 
+Dependency spice-client-glib-2.0 found: YES 0.35
+Build targets in project: 1
+Found ninja-1.8.2 at /usr/bin/ninja
